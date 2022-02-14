@@ -1,0 +1,59 @@
+#!/bin/ksh
+#
+
+set -xv
+
+# ---- Get grib data at certain record # ----------------------
+#
+#  subset $field & ":1 hybrid level" and append all time together
+#
+
+let istart=1
+let iend=48
+
+typeset -Z2 istart
+typeset -Z2 iend
+
+name=${istart}_2_${iend}.grb2
+
+field1=PMTF
+field2=OZCON
+field3='1 hybrid level'
+
+fname=${field1}_${field2}
+
+CYCLES="2019072812 2019072912 2019073012 2019073112 2019080112 2019080212 2019080312 \
+        2019080412 2019080512 2019080612 2019080712 2019080812 2019080912 2019081012 \
+        2019081112 2019081212 2019081312 2019081412 2019081512 2019081612 2019081712 \
+        2019081812 2019081912 2019082012 2019082112 2019082212 2019082312 2019082412 \
+        2019082512 2019082612 2019082712 2019082812 2019082912 2019083012 2019083112"
+
+for cycle in $CYCLES ; do
+
+let i=$istart
+
+cd /gpfs/dell2/emc/modeling/noscrub/Hsin-Mu.Lin/r112_v1/post_fv3_${cycle}
+
+while [ $i -le $iend ]; do
+  let i2=i
+  typeset -Z2 i2
+  file=BGRD3D${i2}.tm00
+
+   if [ $i2 -eq $istart ]; then
+     wgrib2 $file -match ":$field1" -match ":$field3" -GRIB  $fname-$name
+     wgrib2 $file -match ":$field2" -match ":$field3" -append -GRIB $fname-$name
+   else
+     wgrib2 $file -match ":$field1" -match ":$field3" -append -GRIB $fname-$name
+     wgrib2 $file -match ":$field2" -match ":$field3" -append -GRIB $fname-$name
+   fi
+
+  let i=i+1
+done
+
+## ---- excute the stat -----
+
+  /gpfs/dell2/emc/modeling/save/Hsin-Mu.Lin/RRFS-CMAQ-UPP_stat/PM25-O3-stat
+
+done         # cycle
+
+exit
