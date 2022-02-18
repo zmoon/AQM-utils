@@ -2,7 +2,7 @@ module purge
 
 module use /usrx/local/nceplibs/dev/hpc-stack/libs/hpc-stack/modulefiles/stack
 module load hpc/1.1.0
-module load hpc-ips/18.0.1.163
+module load hpc-ips/18.0.5.274
 module load hpc-impi/18.0.1
 module load bacio/2.4.1
 module load nemsio/2.5.2
