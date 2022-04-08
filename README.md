@@ -4,7 +4,7 @@
 ```
 cd AQM-utils
 module use modulefiles
-source env/build_[machine]_[compiler].env
+source modulefiles/build_[machine]_[compiler].env
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=..
