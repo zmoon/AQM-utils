@@ -6,8 +6,9 @@ import xarray as xr
 from netCDF4 import Dataset
 import ESMF
 import os
+import sys
+import argparse
 import numpy as np
-
 
 def parse_args(argv):
 
