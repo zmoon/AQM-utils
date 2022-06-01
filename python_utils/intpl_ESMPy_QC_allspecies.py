@@ -16,33 +16,26 @@ def parse_args(argv):
         description='Regrid fire emission data.'
     )
 
-    parser.add_argument('-d', '--date', action="store_true",
+    parser.add_argument('-d', '--date',
                         help='Date for regridding.',
-                        required=True,
                         )
-    parser.add_argument('-c', '--cycle', action="store_true",
+    parser.add_argument('-c', '--cycle',
                         help='Cycle hour.',
-                        required=True,
                         )
-    parser.add_argument('-s', '--source', action="store_true",
+    parser.add_argument('-s', '--source',
                         help='Path to the source data file.',
-                        required=True,
                         )
-    parser.add_argument('-o', '--output', action="store_true",
+    parser.add_argument('-o', '--output',
                         help='Path to the output data file.',
-                        required=True,
                         )
-    parser.add_argument('-w', '--weight', action="store_true",
+    parser.add_argument('-w', '--weight',
                         help='Path to the regridding weight file.',
-                        required=True,
                         )
-    parser.add_argument('-sg', '--source_grid', action="store_true",
+    parser.add_argument('-sg', '--source_grid',
                         help='Path to the source grid file.',
-                        required=True,
                         )
-    parser.add_argument('-tg', '--target_grid', action="store_true",
+    parser.add_argument('-tg', '--target_grid',
                         help='Path to the target grid file.',
-                        required=True,
                         )
     return parser.parse_args(argv)
 
@@ -51,7 +44,7 @@ def intpl_ESMPy_QC_allspecies(argv):
 
     # parse args
     cla = parse_args(argv)
-    
+   
     DATE=cla.date
     cyc=cla.cycle
     weightfile=cla.weight
@@ -115,8 +108,8 @@ def intpl_ESMPy_QC_allspecies(argv):
 
     regridder = ESMF.RegridFromFile(srcfield, tgtfield,weightfile)
 
+    # output file
     fout=Dataset(outfire24h,'w')
-
     fout.createDimension('Time',24)
     fout.createDimension('xFRP',396)
     fout.createDimension('yFRP',232)
