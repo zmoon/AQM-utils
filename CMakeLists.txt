@@ -30,11 +30,5 @@ find_package(ip 3.3.3 REQUIRED)
 find_package(g2 3.4.0 REQUIRED)
 find_package(sigio 2.3.0 REQUIRED)
 
-# EMC requires executables in ./exec
-set(exec_dir bin)
-if(EMC_EXEC_DIR)
-  set(exec_dir exec)
-endif()
-
 # add project's subdirectories
 add_subdirectory(src)
