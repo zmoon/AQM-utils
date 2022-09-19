@@ -1,11 +1,11 @@
 #%Module
 
 proc ModulesHelp { } {
-   puts stderr "This module loads libraries for building SRW on"
+   puts stderr "This module loads libraries for building AQM-utils on"
    puts stderr "the MSU machineOrion using Intel-2022.1.2"
 }
 
-module-whatis "Loads libraries needed for building SRW on Orion"
+module-whatis "Loads libraries needed for building AQM-utils on Orion"
 
 module load contrib noaatools
 
@@ -17,10 +17,11 @@ module load hpc/1.2.0
 module load hpc-intel/2022.1.2
 module load hpc-impi/2022.1.2
 
-module load srw_common
-
-module load nccmp/1.8.9.0
-module load nco/4.9.3
+module load netcdf/4.7.4
+module load bacio/2.4.1
+module load w3nco/2.4.1
+module load nemsio/2.5.4
+module load w3emc/2.9.2
 
 setenv CMAKE_C_COMPILER mpiicc
 setenv CMAKE_CXX_COMPILER mpiicpc
