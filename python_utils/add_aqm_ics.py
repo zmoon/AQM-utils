@@ -1,11 +1,9 @@
+#Python script to add air quality tracer variables from previous 
+#cycle's restart output to atmosphere's initial condition file 
+
 import xarray as xr
 import os
 import numpy as np
-
-#Python script to add air quality tracer variables from previous 
-#cycle's restart output to atmosphere's initial condition file 
-#written by Kai Wang and Jianping Huang 
-#04/2022
 
 #previous day aqm tracer file
 tracer_file=os.getenv('fv_tracer_file') #'./20200803.120000.fv_tracer.res.tile1.nc'
