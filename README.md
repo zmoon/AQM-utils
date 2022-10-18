@@ -3,6 +3,7 @@
 ## Build
 ```
 cd AQM-utils
+source versions/build.ver.wcoss2 (only for wcoss2)
 module use modulefiles
 module load [machine].[compiler]
 mkdir build
