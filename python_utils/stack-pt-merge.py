@@ -22,21 +22,6 @@ log.setLevel(logging.WARNING)
 
 REF_YEAR = 2016
 
-# Read base directories
-parser = argparse.ArgumentParser(description="Read base directories for CONUS, HI, and AK.")
-parser.add_argument("-conus", "--base_conus_fp", dest="base_conus_fp", required=True, help="BASE_DIR_CONUS")
-parser.add_argument("-hi", "--base_hi_fp", dest="base_hi_fp", required=True, help="BASE_DIR_HI")
-parser.add_argument("-ak", "--base_ak_fp", dest="base_ak_fp", required=True, help="BASE_DIR_AK")
-args = parser.parse_args()
-
-BASE_DIR_CONUS = args.base_conus_fp
-BASE_DIR_HI = args.base_hi_fp
-BASE_DIR_AK = args.base_ak_fp
-
-print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
-print("BASE_DIR_HI:", BASE_DIR_HI)
-print("BASE_DIR_AK:", BASE_DIR_AK)
-
 POINT_DIM_NAME = "nlocs"
 
 NSTEP_DEFAULT = 73  # We want a total of 73 time steps: hour 0 to hour 72
@@ -396,6 +381,10 @@ def load_sectors(which=None):
     if isinstance(which, str):
         which = [which]
 
+    print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
+    print("BASE_DIR_HI:", BASE_DIR_HI)
+    print("BASE_DIR_AK:", BASE_DIR_AK)
+
     todo = []
     for x in set(which):
         if x == "CONUS":
@@ -422,7 +411,8 @@ def load_sectors(which=None):
 #
 
 def main(date_str, *, nstep=NSTEP_DEFAULT,
-    logger_info=False, logger_debug=False, stack_groups_only=False):
+    logger_info=False, logger_debug=False, stack_groups_only=False,
+    BASE_DIR_CONUS, BASE_DIR_HI, BASE_DIR_AK):
     # Adjust logger settings
     if logger_info:
         log.setLevel(logging.INFO)
@@ -464,6 +454,9 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             floored_date = floored_date.add(days=1)
             iday += 1
 
+    print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
+    print("BASE_DIR_AK:", BASE_DIR_AK)
+    print("BASE_DIR_HI:", BASE_DIR_HI)
 
     # Create SectorFiles instances
     secs = []
@@ -681,6 +674,12 @@ def parse_args(args=None):
     parser.add_argument("--debug",
         help="Print logger debug (and info) messages.",
         action="store_true")
+    parser.add_argument("-conus", "--base_conus_fp", 
+        dest="base_conus_fp", required=True, help="BASE_DIR_CONUS")
+    parser.add_argument("-hi", "--base_hi_fp", 
+        dest="base_hi_fp", required=True, help="BASE_DIR_HI")
+    parser.add_argument("-ak", "--base_ak_fp", 
+        dest="base_ak_fp", required=True, help="BASE_DIR_AK")
 
     args = parser.parse_args(args)
     log.debug(f"argparse parsed args={args}")
@@ -691,6 +690,9 @@ def parse_args(args=None):
         "stack_groups_only": args.stack_groups_only,
         "logger_info": args.info,
         "logger_debug": args.debug,
+        "BASE_DIR_CONUS": args.base_conus_fp,
+        "BASE_DIR_HI": args.base_hi_fp,
+        "BASE_DIR_AK": args.base_ak_fp,
     }
 
     # Check that we covered everything
