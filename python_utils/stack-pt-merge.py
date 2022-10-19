@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
+
 # merge NEI stack and inline point sources for each sector
 
-# import calendar
 import logging
 import sys
+import argparse
 from datetime import datetime, timedelta
 from functools import total_ordering
 from pathlib import Path
 
 import netCDF4 as nc
 import numpy as np
-
 
 #
 # Constants
@@ -22,11 +22,20 @@ log.setLevel(logging.WARNING)
 
 REF_YEAR = 2016
 
-BASE_DIR_CONUS = Path("/scratch1/RDARCH/rda-arl-gpu/YouHua.Tang/nei2016v1-pt/12US1")
+# Read base directories
+parser = argparse.ArgumentParser(description="Read base directories for CONUS, HI, and AK.")
+parser.add_argument("-conus", "--base_conus_fp", dest="base_conus_fp", required=True, help="BASE_DIR_CONUS")
+parser.add_argument("-hi", "--base_hi_fp", dest="base_hi_fp", required=True, help="BASE_DIR_HI")
+parser.add_argument("-ak", "--base_ak_fp", dest="base_ak_fp", required=True, help="BASE_DIR_AK")
+args = parser.parse_args()
 
-BASE_DIR_HI = Path("/scratch1/RDARCH/rda-arl-gpu/YouHua.Tang/nei2016v1-pt/3HI1")
+BASE_DIR_CONUS = args.base_conus_fp
+BASE_DIR_HI = args.base_hi_fp
+BASE_DIR_AK = args.base_ak_fp
 
-BASE_DIR_AK = Path("/scratch1/RDARCH/rda-arl-gpu/YouHua.Tang/nei2016v1-pt/9AK1")
+print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
+print("BASE_DIR_HI:", BASE_DIR_HI)
+print("BASE_DIR_AK:", BASE_DIR_AK)
 
 POINT_DIM_NAME = "nlocs"
 
