@@ -8,6 +8,10 @@ endif()
 
 set(CMAKE_Fortran_COMPILER $ENV{CMAKE_Fortran_COMPILER})
 
+if(NOT DEFINED CMAKE_INSTALL_BINDIR)
+  set(CMAKE_INSTALL_BINDIR exec)
+endif()
+
 # set the project name and version
 project(
   AQM-utils

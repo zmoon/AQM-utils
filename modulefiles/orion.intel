@@ -23,6 +23,8 @@ module load w3nco/2.4.1
 module load nemsio/2.5.4
 module load w3emc/2.9.2
 
+module load wgrib2/3.0.2
+
 setenv CMAKE_C_COMPILER mpiicc
 setenv CMAKE_CXX_COMPILER mpiicpc
 setenv CMAKE_Fortran_COMPILER mpiifort
