@@ -12,6 +12,10 @@ if(NOT DEFINED CMAKE_INSTALL_BINDIR)
   set(CMAKE_INSTALL_BINDIR exec)
 endif()
 
+if(NOT DEFINED BUILD_POST_STAT)
+  set(BUILD_POST_STAT on)
+endif()
+
 # set the project name and version
 project(
   AQM-utils
