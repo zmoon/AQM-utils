@@ -300,8 +300,8 @@ class SectorFiles:
                         "for holiday without specific file, "
                         f"dropping the last of these dates in order to have 4 only:\n{s_dates}"
                         )
-                        dates_m = dates_m[:4]
-                        fps_m = fps_m[:4]
+                    dates_m = dates_m[:4]
+                    fps_m = fps_m[:4]
                 
                 # Only four days per month (no holidays)
                 # (seems to be Mon, Tue, Sat, Sun)
