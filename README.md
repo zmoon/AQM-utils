@@ -7,7 +7,7 @@
 cd AQM-utils
 source versions/build.ver.wcoss2
 module use modulefiles
-module load build_wcoss2
+module load build_wcoss2.intel
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_INSTALL_BINDIR=exec
@@ -19,7 +19,7 @@ make install
 ```
 cd AQM-utils
 module use modulefiles
-module load build_[machine]
+module load build_[machine].intel
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_INSTALL_BINDIR=exec

@@ -11,11 +11,16 @@ export cray_mpich_ver=8.1.7
 export cmake_ver=3.20.2
 export python_ver=3.8.6
 
-export hdf5_ver=1.10.6
-export netcdf_ver=4.7.4
 export bacio_ver=2.4.1
+export bufr_ver=11.7.0
+export g2_ver=3.4.5
+export hdf5_ver=1.10.6
+export jasper_ver=2.0.25
+export libjpeg_ver=9c
+export libpng_ver=1.6.37
+export nemsio_ver=2.5.2
+export nemsiogfs_ver=2.5.3
+export netcdf_ver=4.7.4
 export w3nco_ver=2.4.1
 export w3emc_ver=2.9.2
-export nemsio_ver=2.5.2
-
 export wgrib2_ver=2.0.8_wmo
