@@ -42,9 +42,9 @@ list(APPEND lib_src
     ${SRC_FLIB3}
     ${SRC_BLIB})
 
-set(exe_name aqm_post_grib2_793)
-set(lib_name aqm_post_grib2_793_lib)
-set(exe_src aqm_post_grib2_793.f90)
+set(exe_name aqm_post_grib2)
+set(lib_name aqm_post_grib2_lib)
+set(exe_src aqm_post_grib2.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS

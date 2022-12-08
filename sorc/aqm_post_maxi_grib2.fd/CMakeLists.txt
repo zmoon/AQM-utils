@@ -33,7 +33,7 @@ list(APPEND SRC_BLIB
     ${BLIB}/read_grid_coords.f90
     ${BLIB}/read_gridded_aqm.f90
     ${BLIB}/read_gridded_hourly.f90
-    ${BLIB}/read_gridded_vars.f90
+    ${BLIB}/read_gridded_vars.f90   
     ${BLIB}/read_table_lines.f90)
 
 list(APPEND lib_src
@@ -42,9 +42,9 @@ list(APPEND lib_src
     ${SRC_FLIB3}
     ${SRC_BLIB})
 
-set(exe_name aqm_post_bias_cor_grib2_793)
-set(lib_name aqm_post_bias_cor_grib2_793_lib)
-set(exe_src aqm_post_bias_cor_grib2_793.f90)
+set(exe_name aqm_post_maxi_grib2)
+set(lib_name aqm_post_maxi_grib2_lib)
+set(exe_src aqm_post_maxi_grib2.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS
@@ -63,7 +63,6 @@ endif()
 
 add_library(${lib_name} STATIC ${lib_src})
 add_executable(${exe_name} ${exe_src})
-
 
 # find external libraries
 find_package(NetCDF REQUIRED COMPONENTS Fortran)

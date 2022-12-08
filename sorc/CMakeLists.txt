@@ -2,11 +2,7 @@
 
 add_subdirectory(gefs2clbcs_para.fd)
 add_subdirectory(decomp-pt-mpi.fd)
-if (BUILD_POST_STAT)
-  add_subdirectory(O3-PM25-stat.fd)
-endif()
-
-add_subdirectory(aqm_post_grib2_793.fd)
-add_subdirectory(aqm_post_maxi_grib2_793.fd)
-add_subdirectory(aqm_post_bias_cor_grib2_793.fd)
-add_subdirectory(aqm_post_maxi_bias_cor_grib2_793.fd)
+add_subdirectory(aqm_post_grib2.fd)
+add_subdirectory(aqm_post_maxi_grib2.fd)
+add_subdirectory(aqm_post_bias_cor_grib2.fd)
+add_subdirectory(aqm_post_maxi_bias_cor_grib2.fd)
