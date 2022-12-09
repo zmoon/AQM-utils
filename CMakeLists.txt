@@ -32,9 +32,12 @@ find_package(w3emc REQUIRED)
 find_package(w3nco REQUIRED)
 find_package(bacio REQUIRED)
 
-find_package(Jasper REQUIRED)
-find_package(PNG REQUIRED)
-find_package(ZLIB REQUIRED)
+if(BUILD_POST_STAT)
+  find_package(Jasper REQUIRED)
+  find_package(PNG REQUIRED)
+  find_package(ZLIB REQUIRED)
+  find_package(JPEG REQUIRED)
+endif()
 
 # add project's subdirectories
 add_subdirectory(sorc)

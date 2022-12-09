@@ -5,8 +5,6 @@ set(BLIB "${LIB_DIR}/lib.bias")
 set(FLIB "${LIB_DIR}/lib.f90")
 
 message("=== AQM library directory: ${LIB_DIR}")
-message("=== AQM BLIB: ${BLIB}")
-message("=== AQM FLIB: ${FLIB}")
 
 list(APPEND SRC_FLIB1
     ${FLIB}/config.f90 
@@ -73,6 +71,7 @@ target_link_libraries(
   bacio::bacio_4
   ${JASPER_LIBRARIES}
   PNG::PNG
+  JPEG::JPEG
   ${ZLIB_LIBRARY}
 )
 

@@ -21,6 +21,7 @@
 !		Optimize so that every input file is opened only once, and
 !		  all variables from that file are read at the same time.
 ! 2022-may-23	Read and return the units attributes.
+! 2022-dec-03	RRFS: Ignore *.f000 files, start with *.f001 = forecast hour 1.
 !
 ! Input:   Input file specs for Netcdf input files with multiple variables.
 !          List of of requested Netcdf variables, with related parameters.
@@ -102,7 +103,7 @@ subroutine read_gridded_vars (varnames, reader_codes, grid_file_templates, &
    implicit none
 
    character(*), parameter :: &
-      module_id = 'read_gridded_vars.f90 version 2022-may-23'
+      module_id = 'read_gridded_vars.f90 version 2022-dec-03'
 
 ! Input arguments.
 

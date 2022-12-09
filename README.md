@@ -22,7 +22,7 @@ module use modulefiles
 module load build_[machine].intel
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_INSTALL_BINDIR=exec
+cmake .. -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_INSTALL_BINDIR=exec -DBUILD_POST_STAT=off
 make -j2
 make install
 ```
