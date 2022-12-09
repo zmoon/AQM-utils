@@ -25,5 +25,16 @@ project(
 # include local macros
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# find external libraries
+find_package(NetCDF REQUIRED COMPONENTS Fortran)
+find_package(g2 REQUIRED)
+find_package(w3emc REQUIRED)
+find_package(w3nco REQUIRED)
+find_package(bacio REQUIRED)
+
+find_package(Jasper REQUIRED)
+find_package(PNG REQUIRED)
+find_package(ZLIB REQUIRED)
+
 # add project's subdirectories
 add_subdirectory(sorc)

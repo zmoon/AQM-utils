@@ -64,21 +64,16 @@ endif()
 add_library(${lib_name} STATIC ${lib_src})
 add_executable(${exe_name} ${exe_src})
 
-# find external libraries
-find_package(NetCDF REQUIRED COMPONENTS Fortran)
-find_package(g2 REQUIRED)
-find_package(w3emc REQUIRED)
-find_package(w3nco REQUIRED)
-find_package(bacio REQUIRED)
-
 target_link_libraries(
   ${lib_name}
-  PUBLIC
   NetCDF::NetCDF_Fortran
   g2::g2_4
   w3emc::w3emc_4
   w3nco::w3nco_4
   bacio::bacio_4
+  ${JASPER_LIBRARIES}
+  PNG::PNG
+  ${ZLIB_LIBRARY}
 )
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})
