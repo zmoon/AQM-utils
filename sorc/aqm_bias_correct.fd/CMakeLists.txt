@@ -53,6 +53,18 @@ list(APPEND SRC_ALIB1
     ${ALIB}/wind_dir_error.f90
     )
 
+list(APPEND SRC_ALIB2       
+    ${ALIB}/find_analog.f90         
+    ${ALIB}/kf_luca.f90
+    ${ALIB}/short_training_period.f90
+    ${ALIB}/analog_ensemble.f90     
+    ${ALIB}/anenmean_method.f90
+    ${ALIB}/kfan_method.f90         
+    ${ALIB}/filter_dispatch.f90
+    ${ALIB}/weight_control.f90      
+    ${ALIB}/analog_control.f90
+    )
+
 list(APPEND SRC_PLIB1
     ${PLIB}/haversine_km.f90        
     ${PLIB}/jacobi.f90
@@ -81,18 +93,6 @@ list(APPEND SRC_PLIB3
     ${PLIB}/opt_interp_method.f90
     ${PLIB}/regress_method.f90
     ${PLIB}/probability.f90
-    )
-
-list(APPEND SRC_ALIB2       
-    ${ALIB}/find_analog.f90         
-    ${ALIB}/kf_luca.f90
-    ${ALIB}/short_training_period.f90
-    ${ALIB}/analog_ensemble.f90     
-    ${ALIB}/anenmean_method.f90
-    ${ALIB}/kfan_method.f90         
-    ${ALIB}/filter_dispatch.f90
-    ${ALIB}/weight_control.f90      
-    ${ALIB}/analog_control.f90
     )
 
 list(APPEND SRC_LOCAL1
@@ -169,14 +169,7 @@ add_executable(${exe_name} ${exe_src})
 target_link_libraries(
   ${lib_name}
   NetCDF::NetCDF_Fortran
-  g2::g2_4
-  w3emc::w3emc_4
-  w3nco::w3nco_4
-  bacio::bacio_4
-  ${JASPER_LIBRARIES}
-  PNG::PNG
-  JPEG::JPEG
-  ${ZLIB_LIBRARY}
+  bufr::bufr_4
 )
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})

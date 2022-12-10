@@ -32,13 +32,15 @@ list(APPEND SRC_BLIB
     ${BLIB}/read_gridded_aqm.f90
     ${BLIB}/read_gridded_hourly.f90
     ${BLIB}/read_gridded_vars.f90
-    ${BLIB}/read_table_lines.f90)
+    ${BLIB}/read_table_lines.f90
+    )
 
 list(APPEND lib_src
     ${SRC_FLIB1}
     ${SRC_FLIB2}
     ${SRC_FLIB3}
-    ${SRC_BLIB})
+    ${SRC_BLIB}
+    )
 
 set(exe_name aqm_post_bias_cor_grib2)
 set(lib_name aqm_post_bias_cor_grib2_lib)
@@ -68,9 +70,9 @@ target_link_libraries(
   g2::g2_4
   w3emc::w3emc_4
   w3nco::w3nco_4
+  PNG::PNG
   bacio::bacio_4
   ${JASPER_LIBRARIES}
-  PNG::PNG
   ${ZLIB_LIBRARY}
 )
 

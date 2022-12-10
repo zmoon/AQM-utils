@@ -33,10 +33,10 @@ find_package(w3nco REQUIRED)
 find_package(bacio REQUIRED)
 
 if(BUILD_POST_STAT)
-  find_package(Jasper REQUIRED)
   find_package(PNG REQUIRED)
   find_package(ZLIB REQUIRED)
-  find_package(JPEG REQUIRED)
+  find_package(bufr REQUIRED)
+  find_package(Jasper REQUIRED)
 endif()
 
 # add project's subdirectories
