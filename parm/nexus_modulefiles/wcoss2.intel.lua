@@ -18,6 +18,8 @@ setenv("HPC_OPT","/apps/ops/para/libs")
 prepend_path("MODULEPATH", pathJoin("/apps/ops/para/libs/modulefiles/compiler/intel", os.getenv("intel_ver")))
 prepend_path("MODULEPATH", pathJoin("/apps/ops/para/libs/modulefiles/mpi/intel", os.getenv("intel_ver"), "cray-mpich", os.getenv("cray_mpich_ver")))
 
+load(pathJoin("cray-pals", os.getenv("cray_pals_ver")))
+
 load(pathJoin("hdf5", os.getenv("hdf5_ver")))
 load(pathJoin("netcdf", os.getenv("netcdf_ver")))
 load(pathJoin("esmf", os.getenv("esmf_ver")))

@@ -32,6 +32,8 @@ load(pathJoin("wgrib2", os.getenv("wgrib2_ver")))
 load(pathJoin("zlib", os.getenv("zlib_ver")))
 load(pathJoin("jasper", os.getenv("jasper_ver")))
 
+load(pathJoin("cray-pals", os.getenv("cray_pals_ver")))
+
 setenv("CMAKE_C_COMPILER","cc")
 setenv("CMAKE_CXX_COMPILER","CC")
 setenv("CMAKE_Fortran_COMPILER","ftn")
