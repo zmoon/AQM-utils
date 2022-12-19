@@ -393,7 +393,7 @@
          if (varlist(L).eq. 'PM25_TOT' ) then
           fld(i+(j-1)*nx)=bc_data(i,j)
          else
-          fld(i+(j-1)*nx)=bc_data(i,j)*1000.  ! O3 ppmv--> ppbv
+          fld(i+(j-1)*nx)=bc_data(i,j)
          endif
         enddo
         enddo
