@@ -5,8 +5,6 @@ set(BLIB "${LIB_DIR}/lib.bias")
 set(FLIB "${LIB_DIR}/lib.f90")
 
 message("=== AQM library directory: ${LIB_DIR}")
-message("=== AQM BLIB: ${BLIB}")
-message("=== AQM FLIB: ${FLIB}")
 
 list(APPEND SRC_FLIB1
     ${FLIB}/config.f90 
@@ -27,20 +25,11 @@ list(APPEND SRC_FLIB2
 list(APPEND SRC_FLIB3
     ${FLIB}/next_time.f90)
 
-list(APPEND SRC_BLIB
-    ${BLIB}/expand_filename.f90
-    ${BLIB}/gridlocation.f90
-    ${BLIB}/read_grid_coords.f90
-    ${BLIB}/read_gridded_aqm.f90
-    ${BLIB}/read_gridded_hourly.f90
-    ${BLIB}/read_gridded_vars.f90   
-    ${BLIB}/read_table_lines.f90)
-
 list(APPEND lib_src
     ${SRC_FLIB1}
     ${SRC_FLIB2}
     ${SRC_FLIB3}
-    ${SRC_BLIB})
+    )
 
 set(exe_name aqm_post_maxi_bias_cor_grib2)
 set(lib_name aqm_post_maxi_bias_cor_grib2_lib)
@@ -64,21 +53,16 @@ endif()
 add_library(${lib_name} STATIC ${lib_src})
 add_executable(${exe_name} ${exe_src})
 
-# find external libraries
-find_package(NetCDF REQUIRED COMPONENTS Fortran)
-find_package(g2 REQUIRED)
-find_package(w3emc REQUIRED)
-find_package(w3nco REQUIRED)
-find_package(bacio REQUIRED)
-
 target_link_libraries(
   ${lib_name}
-  PUBLIC
   NetCDF::NetCDF_Fortran
   g2::g2_4
   w3emc::w3emc_4
   w3nco::w3nco_4
+  PNG::PNG
   bacio::bacio_4
+  ${JASPER_LIBRARIES}
+  ${ZLIB_LIBRARY}
 )
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})

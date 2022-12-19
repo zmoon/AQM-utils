@@ -1,48 +1,60 @@
 set(IOAPI_OFFSET_64 YES)
 
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib")
+set(ALIB "${LIB_DIR}/lib.analog")
 set(BLIB "${LIB_DIR}/lib.bias")
 set(FLIB "${LIB_DIR}/lib.f90")
+set(PLIB "${LIB_DIR}/lib.probability")
 
 message("=== AQM library directory: ${LIB_DIR}")
 
 list(APPEND SRC_FLIB1
     ${FLIB}/config.f90 
-    ${FLIB}/parse_varexp.f90    
     ${FLIB}/stdlit.f90
-    ${FLIB}/read_netcdf_var.f90
     ${FLIB}/string_utils.f90
-    ${FLIB}/netcdf_sup.f90)
+    )
 
 list(APPEND SRC_FLIB2
     ${FLIB}/date_utils.f90
+    ${FLIB}/distance_btw_coords.f90
+    ${FLIB}/expand_filename.f90
     ${FLIB}/get_free_unit.f90
     ${FLIB}/get_param_module.f90     
     ${FLIB}/message_nolog.f90
+    ${FLIB}/netcdf_sup.f90
     ${FLIB}/netwrite3.no-udunits.f90 
-    ${FLIB}/read_line.f90)
-
-list(APPEND SRC_FLIB3
-    ${FLIB}/next_time.f90)
+    ${FLIB}/read_line.f90
+    ${FLIB}/read_netcdf_var.f90
+    )
 
 list(APPEND SRC_BLIB
-    ${BLIB}/expand_filename.f90
     ${BLIB}/gridlocation.f90
     ${BLIB}/read_grid_coords.f90
     ${BLIB}/read_gridded_aqm.f90
     ${BLIB}/read_gridded_hourly.f90
     ${BLIB}/read_gridded_vars.f90   
-    ${BLIB}/read_table_lines.f90)
+    ${BLIB}/read_table_lines.f90
+    )
+
+list(APPEND SRC_LOCAL
+    derivatives.f90
+    get_command_args.interp.f90
+    interpolate.f90
+    read_config_file_interp.f90
+    read_station_file.f90
+    write_interp_netcdf.f90
+    )
 
 list(APPEND lib_src
     ${SRC_FLIB1}
     ${SRC_FLIB2}
-    ${SRC_FLIB3}
-    ${SRC_BLIB})
+    ${SRC_BLIB}
+    ${SRC_LOCAL}
+    )
 
-set(exe_name aqm_post_maxi_grib2)
-set(lib_name aqm_post_maxi_grib2_lib)
-set(exe_src aqm_post_maxi_grib2.f90)
+set(exe_name aqm_bias_interpolate)
+set(lib_name aqm_bias_interpolate_lib)
+set(exe_src aqm_bias_interpolate.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS
@@ -65,14 +77,6 @@ add_executable(${exe_name} ${exe_src})
 target_link_libraries(
   ${lib_name}
   NetCDF::NetCDF_Fortran
-  g2::g2_4
-  w3emc::w3emc_4
-  w3nco::w3nco_4
-  bacio::bacio_4
-  ${JASPER_LIBRARIES}
-  PNG::PNG
-  JPEG::JPEG
-  ${ZLIB_LIBRARY}
 )
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})

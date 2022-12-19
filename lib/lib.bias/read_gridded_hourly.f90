@@ -14,6 +14,9 @@
 ! 2022-apr-22	Include forecast hour zero, because it is actually the
 !		  first legitimate forecast hour in RRFS-CMAQ.
 ! 2022-may-21	Read and return the units attributes.
+! 2022-dec-03	New file name convention and one-hour time shift.
+!		First forecast hour file is named *.f01 or *.f001.
+!		Ignore f00 and f000 files from now on.
 !
 ! Notes:
 !
@@ -74,7 +77,7 @@ subroutine read_gridded_hourly (in_template, varnames, var_select, diag, &
    implicit none
 
    character(*), parameter :: &
-      module_id = 'read_gridded_hourly.f90 version 2022-may-21'
+      module_id = 'read_gridded_hourly.f90 version 2022-dec-03'
 
    character(*), intent(in ) :: in_template	 ! input filename template
    character(*), intent(in ) :: varnames(:)	 ! requested var names (vars)
@@ -95,7 +98,7 @@ subroutine read_gridded_hourly (in_template, varnames, var_select, diag, &
    character fmt1*80, fstr2*2, fstr3*3
 
    integer vi, nvars, nx, ny, nlay, ntimes, rank
-   integer fhour, fhour_label, nhours, diag2
+   integer fhour, nhours, diag2
    integer nfiles_missing, nmiss, len_varnames
    integer ncid, varid, nc_status
 
@@ -152,8 +155,10 @@ subroutine read_gridded_hourly (in_template, varnames, var_select, diag, &
 ! Main loop over each hourly forecast file.
 !-------------------------------------------------
 
-! Note, index "fhour" is one-based, but forcast hour labels in
-! in RRFS-CMAQ file names are zero-based.
+! Note, starting 2022 Dec 1:
+! Both index "fhour" and forcast hour labels in RRFS-CMAQ file names are
+! now one-based.  Forecast file names run from f000 to fNNN, e.g. f072.
+! Forecast hour zero files (f000, etc.) are now ignored.
 
 hour_loop: &
    do fhour = 1, nhours
@@ -166,16 +171,15 @@ hour_loop: &
 ! On overflow, this method leaves "FF" strings unresolved,
 ! resulting in sensible error messages.
 
-      infile      = in_template
-      fhour_label = fhour - 1		! translate one-based to zero-based
+      infile = in_template
 
-      if (fhour_label < 1000) then
-         write (fstr3, '(i3.3)') fhour_label
+      if (fhour < 1000) then
+         write (fstr3, '(i3.3)') fhour
          call replace_substring (infile, 'FFF', fstr3, rep_count=99)
       end if
 
-      if (fhour_label < 100) then
-         write (fstr2, '(i2.2)') fhour_label
+      if (fhour < 100) then
+         write (fstr2, '(i2.2)') fhour
          call replace_substring (infile, 'FF', fstr2, rep_count=99)
       end if
 
@@ -189,7 +193,7 @@ var_loop: &
 
       varname = varnames(vi)
 
-      if (diag >= 4) print '(a,i4,2a)', '  Hour', fhour_label, ', Read var ', &
+      if (diag >= 4) print '(a,i4,2a)', '  Hour', fhour, ', Read var ', &
          trim (varname)
 
 !-------------------------------------------------------------------------
@@ -338,7 +342,7 @@ get_rank: &
 
 ! Grid diagnostics.
 
-      if (diag >= 3) print '(a,i3.3,2(a,g16.5),3x,a)', '   F', fhour_label, &
+      if (diag >= 3) print '(a,i3.3,2(a,g16.5),3x,a)', '   F', fhour, &
           ' min, max data = ', minval (vdata), ', ', maxval (vdata), &
           trim (varname)
 
@@ -386,8 +390,7 @@ get_rank: &
             end if
 
             print fmt1,' ***', nmiss,' missing hours for ', varnames(vi),' =', &
-               pack ( (/ (fhour, fhour = 0, nhours-1) /), (grid_missing(vi,:)) )
-			! show ZERO-based LABEL forecast hours, not indices
+               pack ( (/ (fhour, fhour = 1, nhours) /), (grid_missing(vi,:)) )
          end if
       end do
 
