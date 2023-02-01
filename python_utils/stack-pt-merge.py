@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-
-# merge NEI stack and inline point sources for each sector
+"""
+Merge NEI stack and inline point sources for each sector
+"""
 
 import logging
 import sys
-import argparse
 from datetime import datetime, timedelta
 from functools import total_ordering
 from pathlib import Path
@@ -26,7 +26,7 @@ POINT_DIM_NAME = "nlocs"
 
 NSTEP_DEFAULT = 73  # We want a total of 73 time steps: hour 0 to hour 72
 
-INPUT_DIR_DEFAULT = Path("/scratch/zmoon/stack-pt/combined-input-test")
+INPUT_DIR_DEFAULT = Path("/scratch/zmoon/stack-pt/combined-input-test")  # Hopper
 
 SECTORS_CONUS = ["ptegu", "ptnonipm", "pt_oilgas", "cmv_c1c2_12", "cmv_c3_12", "othpt"]
 # Example file names:
@@ -212,26 +212,8 @@ class SectorFiles:
     def __init__(self, directory, sector):
         self.base_dir = Path(directory)
         self.sector = sector
-
-        # self.sector_dir = self.base_dir / self.sector
-
-        # # stack_groups file
-        # ps = list(self.sector_dir.glob(f"stack_groups_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
-        # assert len(ps) == 1
-        # self.stack_groups_fp = ps[0]
-        # self.id_ = "_".join(self.stack_groups_fp.stem.split("_")[2:])
-
-        # # inln_mole files
-        # ps = sorted(self.sector_dir.glob(f"inln_mole_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
-        # # TODO: check ID with date removed matches stack_groups file
-        # assert len(ps) >= 1
-        # self.inln_mole_fps = {
-        #     Date(p.name.split("_")[3 + sector.count("_")]): p
-        #     for p in ps
-        # }
-        # self.n_inln_mole_fps = len(self.inln_mole_fps)
-
         self.id_ = self.sector
+
         ps = sorted(self.base_dir.glob(f"{self.sector}_????????.nc"))
         assert len(ps) >= 1
         self.fps = {
@@ -246,9 +228,7 @@ class SectorFiles:
             f"  sector={self.sector!r},\n"
             f"  sector_dir={self.sector_dir},\n"
             f"  stack_groups_fp={self.stack_groups_fp},\n"
-            # f"  inln_mole_fps={{...}},\n"
             f"  fps={{...}},\n"
-            # f"  n_inln_mole_fps={self.n_inln_mole_fps},\n"
             f"  n_fps={self.n_fps},\n"
             ")"
         )
@@ -401,47 +381,12 @@ def print_heading(s, *, ol_char="=", ul_char="-"):
     print(f"{ol}\n{s}\n{ul}")
 
 
-def load_sectors(which=None):
-    """By default load all three sector sources (CONUS, AK, HI)."""
-    default_sources = ["CONUS", "AK", "HI"]
-    if which is None:
-        which = default_sources
-
-    if isinstance(which, str):
-        which = [which]
-
-    print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
-    print("BASE_DIR_HI:", BASE_DIR_HI)
-    print("BASE_DIR_AK:", BASE_DIR_AK)
-
-    todo = []
-    for x in set(which):
-        if x == "CONUS":
-            todo.append((BASE_DIR_CONUS, SECTORS_CONUS))
-        elif x == "AK":
-            todo.append((BASE_DIR_AK, SECTORS_AK))
-        elif x == "HI":
-            todo.append((BASE_DIR_HI, SECTORS_HI))
-        else:
-            raise ValueError(f"{x!r} not supported. Choose from {default_sources}.")
-
-    # Create SectorFiles instances
-    sfss = []
-    for base_dir, sectors in todo:
-        for sector in sectors:
-            log.debug(f"loading {sector} under {base_dir}")
-            sfss.append(SectorFiles(base_dir, sector))
-
-    return sfss
-
-
 #
 # Main function and CLI
 #
 
 def main(date_str, *, nstep=NSTEP_DEFAULT,
     logger_info=False, logger_debug=False, stack_groups_only=False,
-    # BASE_DIR_CONUS, BASE_DIR_HI, BASE_DIR_AK,
     input_dir=INPUT_DIR_DEFAULT,
 ):
     # Adjust logger settings
@@ -484,23 +429,6 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             # Increment day
             floored_date = floored_date.add(days=1)
             iday += 1
-
-    # print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
-    # print("BASE_DIR_AK:", BASE_DIR_AK)
-    # print("BASE_DIR_HI:", BASE_DIR_HI)
-
-    # # Create SectorFiles instances
-    # secs = []
-    # for base_dir, sectors in [
-    #     (BASE_DIR_CONUS, SECTORS_CONUS),
-    #     (BASE_DIR_AK, SECTORS_AK),
-    #     (BASE_DIR_HI, SECTORS_HI),
-    # ]:
-    #     for sector in sectors:
-    #         log.debug(f"loading {sector} under {base_dir}")
-    #         secs.append(SectorFiles(base_dir, sector))
-
-    # assert len(secs) == 16
 
     # Create SectorFiles instances
     secs = []
@@ -546,12 +474,12 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
     # Create output file
     print_heading("Creating output file ...")
     c = nc.Dataset(ofn, "w")
-    point_dim = c.createDimension(POINT_DIM_NAME, npoint_tot)
+    _ = c.createDimension(POINT_DIM_NAME, npoint_tot)
     ntime = nstep
     tstep = 1  # hourly
 
     if not stack_groups_only:
-        time_dim = c.createDimension("time", None) # unlimited for ntime
+        _ = c.createDimension("time", None) # unlimited for ntime
         time_coord = c.createVariable("TIME", np.int32, ("time",))
         time_coord.units = "hours"
         time_coord.description = f"Time step (hours since {date_start})"
@@ -580,7 +508,7 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
 
             # Check that time in the is what we presume
             dtstr = str(a.SDATE * 100 + a.STIME)  # these are ds attrs
-            dt = datetime.strptime(dtstr, "%Y%j%H")
+            _ = datetime.strptime(dtstr, "%Y%j%H")
             tstep = int(a.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
             assert tstep == 1, f"these should be hourly files but tstep={tstep}"
             assert a.STIME == 0, f"files should at start at hour 0 but STIME={a.stime}"
@@ -609,7 +537,6 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                     vars_[vn] = c.createVariable(vn, np.float32, (POINT_DIM_NAME,), fill_value=0.)
                     vars_[vn].units = v.units.strip()
                     vars_[vn].description = v.description.strip()
-                    # vars_[vn].sector = sector_clean  # multiple!
                     vars_[vn][:] = 0.
                 vars_[vn][point_slice] = v[:].data.squeeze()
 
@@ -644,7 +571,6 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                             # Note: complevel=4 is default, 0--9 with 9 most compression
                         vars_[vn].units = v.units.strip()
                         vars_[vn].description = v.description.strip()
-                        # vars_[vn].sector = sector_clean
                         vars_[vn][:] = 0.
                     vars_[vn][time_slice, point_slice] = v[time_slice_in, :].data.squeeze()
 
@@ -727,20 +653,4 @@ def parse_args(args=None):
 
 
 if __name__ == "__main__":
-
-    # # Examine all matches for one with daily (ptegu):
-
-    # def info(name, date):
-    #     s = f"{name}(dow={date.dow}, {'holiday' if date.is_holiday else 'non-holiday'})"
-    #     return s
-
-    # sec = SectorFiles(BASE_DIR_CONUS, "ptegu")
-    # d = Date("20170101")
-    # while d.dt.year == 2017:
-
-    #     date_r, fp = sec.find_closest_inln_mole_fp(d)
-    #     print(d, "->", date_r, info("target", d), info("ref", date_r))
-
-    #     d = d.add(days=1)
-
     raise SystemExit(main(**parse_args()))
