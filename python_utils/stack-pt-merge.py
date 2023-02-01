@@ -26,6 +26,8 @@ POINT_DIM_NAME = "nlocs"
 
 NSTEP_DEFAULT = 73  # We want a total of 73 time steps: hour 0 to hour 72
 
+INPUT_DIR_DEFAULT = Path("/scratch/zmoon/stack-pt/combined-input-test")
+
 SECTORS_CONUS = ["ptegu", "ptnonipm", "pt_oilgas", "cmv_c1c2_12", "cmv_c3_12", "othpt"]
 # Example file names:
 #   daily    -- inln_mole_cmv_c1c2_12_20161207_12us1_cmaq_cb6_2016fh_16j.ncf
@@ -211,23 +213,32 @@ class SectorFiles:
         self.base_dir = Path(directory)
         self.sector = sector
 
-        self.sector_dir = self.base_dir / self.sector
+        # self.sector_dir = self.base_dir / self.sector
 
-        # stack_groups file
-        ps = list(self.sector_dir.glob(f"stack_groups_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
-        assert len(ps) == 1
-        self.stack_groups_fp = ps[0]
-        self.id_ = "_".join(self.stack_groups_fp.stem.split("_")[2:])
+        # # stack_groups file
+        # ps = list(self.sector_dir.glob(f"stack_groups_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
+        # assert len(ps) == 1
+        # self.stack_groups_fp = ps[0]
+        # self.id_ = "_".join(self.stack_groups_fp.stem.split("_")[2:])
 
-        # inln_mole files
-        ps = sorted(self.sector_dir.glob(f"inln_mole_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
-        # TODO: check ID with date removed matches stack_groups file
+        # # inln_mole files
+        # ps = sorted(self.sector_dir.glob(f"inln_mole_{self.sector}_*_{self._ref_year}fh_16j.ncf"))
+        # # TODO: check ID with date removed matches stack_groups file
+        # assert len(ps) >= 1
+        # self.inln_mole_fps = {
+        #     Date(p.name.split("_")[3 + sector.count("_")]): p
+        #     for p in ps
+        # }
+        # self.n_inln_mole_fps = len(self.inln_mole_fps)
+
+        self.id_ = self.sector
+        ps = sorted(self.base_dir.glob(f"{self.sector}_????????.nc"))
         assert len(ps) >= 1
-        self.inln_mole_fps = {
-            Date(p.name.split("_")[3 + sector.count("_")]): p
+        self.fps = {
+            Date(p.stem.split("_")[1]): p
             for p in ps
         }
-        self.n_inln_mole_fps = len(self.inln_mole_fps)
+        self.n_fps = len(self.fps)
 
     def __repr__(self):
         return (
@@ -235,12 +246,14 @@ class SectorFiles:
             f"  sector={self.sector!r},\n"
             f"  sector_dir={self.sector_dir},\n"
             f"  stack_groups_fp={self.stack_groups_fp},\n"
-            f"  inln_mole_fps={{...}},\n"
-            f"  n_inln_mole_fps={self.n_inln_mole_fps},\n"
+            # f"  inln_mole_fps={{...}},\n"
+            f"  fps={{...}},\n"
+            # f"  n_inln_mole_fps={self.n_inln_mole_fps},\n"
+            f"  n_fps={self.n_fps},\n"
             ")"
         )
 
-    def find_closest_inln_mole_fp(self, target):
+    def find_closest_fp(self, target):
         """Return (matched Date, associated file path).
 
         Parameters
@@ -252,7 +265,7 @@ class SectorFiles:
         # Extract data for the target's month
         dates_m = []
         fps_m = []
-        for d, fp in self.inln_mole_fps.items():
+        for d, fp in self.fps.items():
             if d.dt.year == self._ref_year and d.dt.month == target.dt.month:
                 # Note skipping 2015 data
                 dates_m.append(d)
@@ -287,10 +300,10 @@ class SectorFiles:
             log.debug(f"target is a holiday")
             desired_md = HOLIDAY_MD[self._ref_year][target._iholiday]
             d = Date(f"{self._ref_year}{desired_md}")
-            if d in self.inln_mole_fps:
+            if d in self.fps:
                 # Four days per month + holidays OR daily files
                 d_r = d
-                fp_r = self.inln_mole_fps[d]
+                fp_r = self.fps[d]
             else:
                 if len(dates_m) > 4:
                     # e.g. day before Thanksgiving, which we consider holiday,
@@ -428,7 +441,9 @@ def load_sectors(which=None):
 
 def main(date_str, *, nstep=NSTEP_DEFAULT,
     logger_info=False, logger_debug=False, stack_groups_only=False,
-    BASE_DIR_CONUS, BASE_DIR_HI, BASE_DIR_AK):
+    # BASE_DIR_CONUS, BASE_DIR_HI, BASE_DIR_AK,
+    input_dir=INPUT_DIR_DEFAULT,
+):
     # Adjust logger settings
     if logger_info:
         log.setLevel(logging.INFO)
@@ -470,22 +485,30 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             floored_date = floored_date.add(days=1)
             iday += 1
 
-    print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
-    print("BASE_DIR_AK:", BASE_DIR_AK)
-    print("BASE_DIR_HI:", BASE_DIR_HI)
+    # print("BASE_DIR_CONUS:", BASE_DIR_CONUS)
+    # print("BASE_DIR_AK:", BASE_DIR_AK)
+    # print("BASE_DIR_HI:", BASE_DIR_HI)
+
+    # # Create SectorFiles instances
+    # secs = []
+    # for base_dir, sectors in [
+    #     (BASE_DIR_CONUS, SECTORS_CONUS),
+    #     (BASE_DIR_AK, SECTORS_AK),
+    #     (BASE_DIR_HI, SECTORS_HI),
+    # ]:
+    #     for sector in sectors:
+    #         log.debug(f"loading {sector} under {base_dir}")
+    #         secs.append(SectorFiles(base_dir, sector))
+
+    # assert len(secs) == 16
 
     # Create SectorFiles instances
     secs = []
-    for base_dir, sectors in [
-        (BASE_DIR_CONUS, SECTORS_CONUS),
-        (BASE_DIR_AK, SECTORS_AK),
-        (BASE_DIR_HI, SECTORS_HI),
-    ]:
-        for sector in sectors:
-            log.debug(f"loading {sector} under {base_dir}")
-            secs.append(SectorFiles(base_dir, sector))
+    for sec_group in ["d", "4pm", "4pmh"]:
+        log.debug(f"loading {sec_group} under {input_dir}")
+        secs.append(SectorFiles(input_dir, sec_group))
 
-    assert len(secs) == 16
+    assert len(secs) == 3
 
     # Determine length of points dim and collect file paths
     print_heading("Determining total length of points dim ...")
@@ -500,30 +523,19 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
         for floored_date, time_slice_in in iter_days():
             log.info(floored_date)
 
-            p_a = sec.stack_groups_fp
-            date_r, p_b = sec.find_closest_inln_mole_fp(floored_date)
+            date_r, p_a = sec.find_closest_fp(floored_date)
             log.debug(f"{floored_date} -> {date_r} for sector {sec.id_}")
 
-            paths_this_sec.append((p_a, p_b))
+            paths_this_sec.append((p_a,))
             time_slices_this_sec.append(time_slice_in)
 
             a = nc.Dataset(p_a, "r")
-            b = nc.Dataset(p_b, "r")
 
-            npoint = npoint_a = a.dimensions["ROW"].size
-            npoint_b = b.dimensions["ROW"].size
-            if npoint_b != npoint_a:
-                print(
-                    "Error: Inconsistent point dimension length between inln_mole and stack_groups files.\n"
-                    f"  {p_a} - {npoint_a}\n"
-                    f"  {p_b} - {npoint_b}"
-                )
-                return 1
+            npoint = a.dimensions["point"].size
 
             npoint_this_sec.append(npoint)
             log.info(f"{npoint} points")
             a.close()
-            b.close()
 
         assert len(set(npoint_this_sec)) == 1, f"should all be same but we have {npoint_this_sec}"
         data.append((paths_this_sec, time_slices_this_sec))
@@ -554,27 +566,26 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
         # Inner loop is over sectors, to fill the full point dim
         ipoint_start = 0
         for tup in data:
-            p_a, p_b = tup[0][k]
+            p_a, = tup[0][k]
             time_slice_in = tup[1][k]
 
-            sg_id = '_'.join(p_b.stem.split('_')[2:])
+            sg_id = p_a.stem
             print(f"loading {sg_id}")
 
             a = nc.Dataset(p_a)
-            b = nc.Dataset(p_b)
 
             # Number of points for this sector
             # Note: checked for consistency with b above
-            npoint = a.dimensions["ROW"].size
+            npoint = a.dimensions["point"].size
 
             # Check that time in the is what we presume
-            dtstr = str(b.SDATE * 100 + b.STIME)  # these are ds attrs
+            dtstr = str(a.SDATE * 100 + a.STIME)  # these are ds attrs
             dt = datetime.strptime(dtstr, "%Y%j%H")
-            tstep = int(b.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
+            tstep = int(a.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
             assert tstep == 1, f"these should be hourly files but tstep={tstep}"
-            assert b.STIME == 0, f"files should at start at hour 0 but STIME={b.stime}"
-            ntime = b.dimensions["TSTEP"].size  # but also a dimension
-            assert ntime == 25, "expected 25 times but ntime={ntime}"
+            assert a.STIME == 0, f"files should at start at hour 0 but STIME={a.stime}"
+            ntime = a.dimensions["tstep"].size  # but also a dimension
+            assert ntime == 25, f"expected 25 times but ntime={ntime}"
 
             # Define slices for the output file
             point_slice = slice(ipoint_start, ipoint_start + npoint)
@@ -582,7 +593,7 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             time_slice = slice(itime_start, itime_start + ntime_slice)
 
             # Add variables from stack_groups file (all only vary in point dim)
-            for vn in [
+            sg_vns = [
                 "LATITUDE",
                 "LONGITUDE",
                 "STKDM",
@@ -591,13 +602,13 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                 "STKVE",
                 "STKFLW",
                 "STKCNT",
-            ]:
+            ]
+            for vn in sg_vns:
                 v = a.variables[vn]
                 if vn not in vars_:
                     vars_[vn] = c.createVariable(vn, np.float32, (POINT_DIM_NAME,), fill_value=0.)
                     vars_[vn].units = v.units.strip()
-                    vars_[vn].long_name = v.long_name.strip()
-                    vars_[vn].description = v.var_desc.strip()
+                    vars_[vn].description = v.description.strip()
                     # vars_[vn].sector = sector_clean  # multiple!
                     vars_[vn][:] = 0.
                 vars_[vn][point_slice] = v[:].data.squeeze()
@@ -619,10 +630,12 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             if not stack_groups_only:
 
                 # Add variables from inln_mole file
-                blist = list(b.variables.keys())
-                blist.remove("TFLAG")
-                for vn in blist:
-                    v = b.variables[vn]
+                for vn in [
+                    vn
+                    for vn in list(a.variables.keys())
+                    if vn not in sg_vns
+                ]:
+                    v = a.variables[vn]
                     if vn not in vars_:
                         vars_[vn] = c.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
                             zlib=True, complevel=4, fill_value=0.
@@ -630,14 +643,14 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                             # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
                             # Note: complevel=4 is default, 0--9 with 9 most compression
                         vars_[vn].units = v.units.strip()
-                        vars_[vn].long_name = v.long_name.strip()
-                        vars_[vn].description = v.var_desc.strip()
+                        vars_[vn].description = v.description.strip()
                         # vars_[vn].sector = sector_clean
                         vars_[vn][:] = 0.
                     vars_[vn][time_slice, point_slice] = v[time_slice_in, :].data.squeeze()
 
             # Increment (move along point dim in the output file)
             ipoint_start = point_slice.stop
+            a.close()
 
         # Increment (move along time dim " ")
         itime_start = time_slice.stop
@@ -674,13 +687,17 @@ def parse_args(args=None):
             "data from 16 sectors."
         )
     )
-    parser.add_argument('-s','--START',
+    parser.add_argument("-s", "--start",
         help="Start date/time, in YYYYMMDD[HH] format (`-`, `_` ignored).",
-	type=str,required=True)
-    parser.add_argument('-n','--nstep',
+        type=str,required=True)
+    parser.add_argument("-n", "--nstep",
         default=NSTEP_DEFAULT,
         help="Desired number of time steps for the output file (including start).",
-        type=int,required=False)
+        type=int)
+    parser.add_argument("-i", "--input-dir",
+        type=Path,
+        default=INPUT_DIR_DEFAULT,                
+        help="Directory where the compiled sector group files are located.")
     parser.add_argument("--stack-groups-only",
         help="stack_groups data only.",
         action="store_true")
@@ -690,25 +707,17 @@ def parse_args(args=None):
     parser.add_argument("--debug",
         help="Print logger debug (and info) messages.",
         action="store_true")
-    parser.add_argument("-conus", "--base_conus_fp", 
-        dest="base_conus_fp", required=True, help="BASE_DIR_CONUS")
-    parser.add_argument("-hi", "--base_hi_fp", 
-        dest="base_hi_fp", required=True, help="BASE_DIR_HI")
-    parser.add_argument("-ak", "--base_ak_fp", 
-        dest="base_ak_fp", required=True, help="BASE_DIR_AK")
 
     args = parser.parse_args(args)
     log.debug(f"argparse parsed args={args}")
 
     kwargs = {
-        "date_str": args.START,
+        "date_str": args.start,
         "nstep": args.nstep,
+        "input_dir": args.input_dir,
         "stack_groups_only": args.stack_groups_only,
         "logger_info": args.info,
         "logger_debug": args.debug,
-        "BASE_DIR_CONUS": args.base_conus_fp,
-        "BASE_DIR_HI": args.base_hi_fp,
-        "BASE_DIR_AK": args.base_ak_fp,
     }
 
     # Check that we covered everything
