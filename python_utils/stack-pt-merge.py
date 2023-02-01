@@ -638,7 +638,7 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                     v = a.variables[vn]
                     if vn not in vars_:
                         vars_[vn] = c.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
-                            zlib=True, complevel=4, fill_value=0.
+                            zlib=True, complevel=1, fill_value=0.
                         )
                             # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
                             # Note: complevel=4 is default, 0--9 with 9 most compression
