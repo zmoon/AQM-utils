@@ -618,12 +618,19 @@ def parse_args(args=None):
         type=str,required=True)
     parser.add_argument("-n", "--nstep",
         default=NSTEP_DEFAULT,
-        help="Desired number of time steps for the output file (including start).",
+        help=(
+            "Desired number of time steps for the output file (including start). "
+            f"(default: {NSTEP_DEFAULT})"
+        ),
         type=int)
     parser.add_argument("-i", "--input-dir",
         type=Path,
         default=INPUT_DIR_DEFAULT,                
-        help="Directory where the compiled sector group files are located.")
+        help=(
+            "Directory where the compiled sector group files are located. "
+            f"(default: {INPUT_DIR_DEFAULT.as_posix()} (GMU Hopper))"
+        )
+    )
     parser.add_argument("--stack-groups-only",
         help="stack_groups data only.",
         action="store_true")
