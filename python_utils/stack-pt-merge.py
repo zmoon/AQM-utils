@@ -48,8 +48,7 @@ SECTORS_CONUS = ["ptegu", "ptnonipm", "pt_oilgas", "cmv_c1c2_12", "cmv_c3_12", "
 # - daily: ptegu, cmv_c1c2_12, cmv_c3_12
 # - four days per month: othpt
 # - four days per month + holidays: ptnonipm, pt_oilgas
-# TODO: the numbers suggest 17 holidays but we have 16??
-# (Looks like they include 1227 as well)
+# (They include 1227 as holiday but we do not, so 17 intead of 16 holidays)
 
 SECTORS_HI = ["ptegu", "ptnonipm", "cmv_c1c2_3hi1", "cmv_c3_3hi1"]
 # Example file names:
@@ -210,11 +209,11 @@ class SectorFiles:
     """Year in the emissions data."""
 
     def __init__(self, directory, sector):
-        self.base_dir = Path(directory)
+        self.dir_ = Path(directory)
         self.sector = sector
         self.id_ = self.sector
 
-        ps = sorted(self.base_dir.glob(f"{self.sector}_????????.nc"))
+        ps = sorted(self.dir_.glob(f"{self.sector}_????????.nc"))
         assert len(ps) >= 1
         self.fps = {
             Date(p.stem.split("_")[1]): p
@@ -226,8 +225,7 @@ class SectorFiles:
         return (
             f"{type(self).__name__}(\n"
             f"  sector={self.sector!r},\n"
-            f"  sector_dir={self.sector_dir},\n"
-            f"  stack_groups_fp={self.stack_groups_fp},\n"
+            f"  dir_={self.dir_},\n"
             f"  fps={{...}},\n"
             f"  n_fps={self.n_fps},\n"
             ")"
@@ -287,7 +285,7 @@ class SectorFiles:
             else:
                 if len(dates_m) > 4:
                     # e.g. day before Thanksgiving, which we consider holiday,
-                    # but ptnonipm has Thanksgiving and the two days after
+                    # but ptnonipm (e.g.) has Thanksgiving and the two days after
                     s_dates = "\n".join(f"- {d}" for d in dates_m)
                     log.warning(
                         "for holiday without specific file, "
@@ -315,7 +313,6 @@ class SectorFiles:
         else:
             log.debug(f"target is *not* a holiday")
             # If target is not a holiday, we don't want to match to a holiday
-            # if len(dates_m_nh) == calendar.monthrange(self._ref_year, target.dt.month)[1] - nholidays(...):
             if len(dates_m_nh) > 25:
                 # Assume daily
                 # Look for closest relative week-of-year with matching day-of-week
@@ -451,19 +448,19 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
         for floored_date, time_slice_in in iter_days():
             log.info(floored_date)
 
-            date_r, p_a = sec.find_closest_fp(floored_date)
+            date_r, p = sec.find_closest_fp(floored_date)
             log.debug(f"{floored_date} -> {date_r} for sector {sec.id_}")
 
-            paths_this_sec.append((p_a,))
+            paths_this_sec.append(p)
             time_slices_this_sec.append(time_slice_in)
 
-            a = nc.Dataset(p_a, "r")
+            ds = nc.Dataset(p, "r")
 
-            npoint = a.dimensions["point"].size
-
+            npoint = ds.dimensions["point"].size
             npoint_this_sec.append(npoint)
             log.info(f"{npoint} points")
-            a.close()
+
+            ds.close()
 
         assert len(set(npoint_this_sec)) == 1, f"should all be same but we have {npoint_this_sec}"
         data.append((paths_this_sec, time_slices_this_sec))
@@ -473,46 +470,45 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
 
     # Create output file
     print_heading("Creating output file ...")
-    c = nc.Dataset(ofn, "w")
-    _ = c.createDimension(POINT_DIM_NAME, npoint_tot)
+    ds_out = nc.Dataset(ofn, "w")
+    _ = ds_out.createDimension(POINT_DIM_NAME, npoint_tot)
     ntime = nstep
     tstep = 1  # hourly
 
     if not stack_groups_only:
-        _ = c.createDimension("time", None) # unlimited for ntime
-        time_coord = c.createVariable("TIME", np.int32, ("time",))
+        _ = ds_out.createDimension("time", None) # unlimited for ntime
+        time_coord = ds_out.createVariable("TIME", np.int32, ("time",))
         time_coord.units = "hours"
         time_coord.description = f"Time step (hours since {date_start})"
         time_coord[:] = np.arange(0, ntime * tstep, tstep)
     else:
-        _ = c.createDimension("nchar", 100)
+        _ = ds_out.createDimension("nchar", 100)
 
-    vars_ = {}
     itime_start = 0
     for k in range(ndays):
 
         # Inner loop is over sectors, to fill the full point dim
         ipoint_start = 0
         for tup in data:
-            p_a, = tup[0][k]
+            p = tup[0][k]
             time_slice_in = tup[1][k]
 
-            sg_id = p_a.stem
+            sg_id = p.stem
             print(f"loading {sg_id}")
 
-            a = nc.Dataset(p_a)
+            ds_in = nc.Dataset(p)
 
             # Number of points for this sector
             # Note: checked for consistency with b above
-            npoint = a.dimensions["point"].size
+            npoint = ds_in.dimensions["point"].size
 
             # Check that time in the is what we presume
-            dtstr = str(a.SDATE * 100 + a.STIME)  # these are ds attrs
+            dtstr = str(ds_in.SDATE * 100 + ds_in.STIME)  # these are ds attrs
             _ = datetime.strptime(dtstr, "%Y%j%H")
-            tstep = int(a.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
+            tstep = int(ds_in.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
             assert tstep == 1, f"these should be hourly files but tstep={tstep}"
-            assert a.STIME == 0, f"files should at start at hour 0 but STIME={a.stime}"
-            ntime = a.dimensions["tstep"].size  # but also a dimension
+            assert ds_in.STIME == 0, f"files should at start at hour 0 but STIME={ds_in.stime}"
+            ntime = ds_in.dimensions["tstep"].size  # but also a dimension
             assert ntime == 25, f"expected 25 times but ntime={ntime}"
 
             # Define slices for the output file
@@ -532,66 +528,69 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                 "STKCNT",
             ]
             for vn in sg_vns:
-                v = a.variables[vn]
-                if vn not in vars_:
-                    vars_[vn] = c.createVariable(vn, np.float32, (POINT_DIM_NAME,), fill_value=0.)
-                    vars_[vn].units = v.units.strip()
-                    vars_[vn].description = v.description.strip()
-                    vars_[vn][:] = 0.
-                vars_[vn][point_slice] = v[:].data.squeeze()
+                v_in = ds_in.variables[vn]
+                if vn not in ds_out.variables:
+                    v_out = ds_out.createVariable(vn, np.float32, (POINT_DIM_NAME,), fill_value=0.)
+                    v_out.units = v_in.units.strip()
+                    v_out.description = v_in.description.strip()
+                    v_out[:] = 0.
+                else:
+                    v_out = ds_out.variables[vn]
+                v_out[point_slice] = v_in[:].data.squeeze()
 
             if stack_groups_only:
-
                 # Add sector file identifying info
                 vn = "SID"
-                if vn not in vars_:
-                    vars_[vn] = c.createVariable(vn, "S1", (POINT_DIM_NAME, "nchar"))
-                    vars_[vn].long_name = "Group ID"
-                    vars_[vn].description = "Extracted from stack_groups file path, including sector, source, month"
-                    vars_[vn][:] = ""
+                if vn not in ds_out.variables:
+                    v_out = ds_out.createVariable(vn, "S1", (POINT_DIM_NAME, "nchar"))
+                    v_out.long_name = "Group ID"
+                    v_out.description = "Extracted from stack_groups file path, including sector, source, month"
+                    v_out[:] = ""
+                else:
+                    v_out = ds_out.variables[vn]
                 x = np.full((100,), "", "S1")
-                # vars_[vn][point_slice, :] = nc.stringtochar(np.array([sg_id]))
                 x[:len(sg_id)] = [np.string_(c) for c in sg_id]
-                vars_[vn][point_slice, :] = x
+                v_out[point_slice, :] = x
 
             if not stack_groups_only:
-
                 # Add variables from inln_mole file
                 for vn in [
                     vn
-                    for vn in list(a.variables.keys())
+                    for vn in list(ds_in.variables.keys())
                     if vn not in sg_vns
                 ]:
-                    v = a.variables[vn]
-                    if vn not in vars_:
-                        vars_[vn] = c.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
+                    v_in = ds_in.variables[vn]
+                    if vn not in ds_out.variables:
+                        v_out = ds_out.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
                             zlib=True, complevel=1, fill_value=0.
                         )
                             # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
                             # Note: complevel=4 is default, 0--9 with 9 most compression
-                        vars_[vn].units = v.units.strip()
-                        vars_[vn].description = v.description.strip()
-                        vars_[vn][:] = 0.
-                    vars_[vn][time_slice, point_slice] = v[time_slice_in, :].data.squeeze()
+                        v_out.units = v_in.units.strip()
+                        v_out.description = v_in.description.strip()
+                        v_out[:] = 0.
+                    else:
+                        v_out = ds_out.variables[vn]
+                    v_out[time_slice, point_slice] = v_in[time_slice_in, :].data.squeeze()
 
             # Increment (move along point dim in the output file)
             ipoint_start = point_slice.stop
-            a.close()
+            ds_in.close()
 
         # Increment (move along time dim " ")
         itime_start = time_slice.stop
 
     # Quick check
-    assert np.isnan(vars_["LATITUDE"][:]).sum() == 0
+    assert np.isnan(ds_out.variables["LATITUDE"][:]).sum() == 0
     if not stack_groups_only:
         vn = "NO"
-        x = np.isnan(vars_[vn][:])
+        x = np.isnan(ds_out.variables[vn][:])
         f = x.sum() / x.size
         if f > 0:
             log.warning(rf"{f * 100:.2f}% of {vn} values are NaN")
 
     print_heading("Writing ...")
-    c.close()
+    ds_out.close()
     # Note: 20G for full file with 73 times and all 16 sectors
 
     return 0
@@ -632,7 +631,7 @@ def parse_args(args=None):
         )
     )
     parser.add_argument("--stack-groups-only",
-        help="stack_groups data only.",
+        help="'stack_groups' data only.",
         action="store_true")
     parser.add_argument("--info",
         help="Print logger info messages.",
