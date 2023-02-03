@@ -530,10 +530,10 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             for vn in sg_vns:
                 v_in = ds_in.variables[vn]
                 if vn not in ds_out.variables:
-                    v_out = ds_out.createVariable(vn, np.float32, (POINT_DIM_NAME,), fill_value=0.)
+                    v_out = ds_out.createVariable(vn, np.float32, (POINT_DIM_NAME,))
                     v_out.units = v_in.units.strip()
                     v_out.description = v_in.description.strip()
-                    v_out[:] = 0.
+                    v_out[:] = 0
                 else:
                     v_out = ds_out.variables[vn]
                 v_out[point_slice] = v_in[:].data.squeeze()
@@ -562,13 +562,13 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                     v_in = ds_in.variables[vn]
                     if vn not in ds_out.variables:
                         v_out = ds_out.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
-                            zlib=True, complevel=1, fill_value=0.
+                            zlib=True, complevel=1,
                         )
                             # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
                             # Note: complevel=4 is default, 0--9 with 9 most compression
                         v_out.units = v_in.units.strip()
                         v_out.description = v_in.description.strip()
-                        v_out[:] = 0.
+                        v_out[:] = 0
                     else:
                         v_out = ds_out.variables[vn]
                     v_out[time_slice, point_slice] = v_in[time_slice_in, :].data.squeeze()
