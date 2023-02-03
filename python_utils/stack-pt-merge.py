@@ -17,7 +17,7 @@ import numpy as np
 #
 
 logging.basicConfig(stream=sys.stdout)
-log = logging.getLogger("stack-pt")
+log = logging.getLogger("stack-pt-merge")
 log.setLevel(logging.WARNING)
 
 REF_YEAR = 2016
