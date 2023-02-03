@@ -415,6 +415,7 @@ def main(
     print(f"Final time: {date_final}")
     print(f"Using {REF_YEAR} point emissions data")
     print(f"Output filename: {ofn}")
+    print(f"Input directory: {input_dir.resolve(strict=True).as_posix()}")
 
     def iter_days():
         """Yield floored Date objects and associated time slices for the daily files."""
