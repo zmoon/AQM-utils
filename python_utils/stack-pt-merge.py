@@ -61,7 +61,7 @@ SECTORS_AK = ["ptegu", "ptnonipm", "pt_oilgas", "cmv_c1c2_9ak1", "cmv_c3_9ak1", 
 #            -- stack_groups_ptegu_9AK1_2016fh_16j.ncf
 
 HOLIDAY_MD = {
-    #new: "0101 0102 XXXX XXXX XXXX XXXX 0704 0705 XXXX XXXX XXXX XXXX XXXX 1224 1225 1226".split(),
+    #   : "0101 0102 XXXX XXXX XXXX XXXX 0704 0705 XXXX XXXX XXXX XXXX XXXX 1224 1225 1226".split(),
     2015: "0101 0102 0403 0404 0525 0526 0704 0705 0907 0908 1125 1126 1127 1224 1225 1226".split(),
     2016: "0101 0102 0325 0326 0530 0531 0704 0705 0905 0906 1124 1125 1126 1224 1225 1226".split(),
     2017: "0101 0102 0414 0415 0529 0530 0704 0705 0904 0905 1122 1123 1124 1224 1225 1226".split(),
@@ -73,7 +73,7 @@ HOLIDAY_MD = {
     2023: "0101 0102 0407 0408 0529 0530 0704 0705 0904 0905 1122 1123 1124 1224 1225 1226".split(),
     2024: "0101 0102 0329 0330 0527 0529 0704 0705 0902 0903 1127 1128 1129 1224 1225 1226".split(),
     2025: "0101 0102 0418 0419 0526 0527 0704 0705 0901 0902 1126 1127 1128 1224 1225 1226".split(),
-    2026: "0101 0102 0403 0404 0525 0526 0704 0705 0907 0908 1125 1126 1127 1224 1225 1226".split(),    
+    2026: "0101 0102 0403 0404 0525 0526 0704 0705 0907 0908 1125 1126 1127 1224 1225 1226".split(),
 }
 # Holidays + day after:
 # - New Years
@@ -215,10 +215,7 @@ class SectorFiles:
 
         ps = sorted(self.dir_.glob(f"{self.sector}_????????.nc"))
         assert len(ps) >= 1
-        self.fps = {
-            Date(p.stem.split("_")[1]): p
-            for p in ps
-        }
+        self.fps = {Date(p.stem.split("_")[1]): p for p in ps}
         self.n_fps = len(self.fps)
 
     def __repr__(self):
@@ -260,10 +257,12 @@ class SectorFiles:
         if len(dates_m_nh) == 5:
             # Some such ptnonipm have 2 days after Thanksgiving (2016-11-26) and Christmas (2016-12-27).
             # We aren't treating these as holidays, so just drop for now.
-            # TODO: check that the one we are dropping here is indeed one of those two?    
+            # TODO: check that the one we are dropping here is indeed one of those two?
 
             s_dates = "\n".join(f"- {d}" for d in dates_m_nh)
-            log.warning(f"dropping the last of these non-holiday dates in order to have 4 only:\n{s_dates}")
+            log.warning(
+                f"dropping the last of these non-holiday dates in order to have 4 only:\n{s_dates}"
+            )
             dates_m_nh = dates_m_nh[:-1]
             fps_m_nh = fps_m_nh[:-1]
 
@@ -290,10 +289,10 @@ class SectorFiles:
                     log.warning(
                         "for holiday without specific file, "
                         f"dropping the last of these dates in order to have 4 only:\n{s_dates}"
-                        )
+                    )
                     dates_m = dates_m[:4]
                     fps_m = fps_m[:4]
-                
+
                 # Only four days per month (no holidays)
                 # (seems to be Mon, Tue, Sat, Sun)
                 assert len(dates_m) == 4
@@ -333,7 +332,9 @@ class SectorFiles:
                     iwds_r = [dates_m_nh[i].dow for i in inds]
                     if iwd_t in iwds_r:
                         best = iws_rel_r.index(iw_rel) + iwds_r.index(iwd_t)
-                        log.debug(f"match: ind={best}, iw_r={iws_r[best]}, iw_rel_r={iws_rel_r[best]}")
+                        log.debug(
+                            f"match: ind={best}, iw_r={iws_r[best]}, iw_rel_r={iws_rel_r[best]}"
+                        )
                         break
                 else:
                     raise Exception(f"Failed to find good match for {target}.")
@@ -360,8 +361,12 @@ class SectorFiles:
                 fp_r = fps_m_nh[i]
 
             else:
-                s_fps = "\n".join(f"- {date} {fp.as_posix()}" for date, fp in zip(dates_m_nh, fps_m_nh))
-                raise Exception(f"Unexpected len-{len(fps_m_nh)} file set for target {target}:\n{s_fps}")
+                s_fps = "\n".join(
+                    f"- {date} {fp.as_posix()}" for date, fp in zip(dates_m_nh, fps_m_nh)
+                )
+                raise Exception(
+                    f"Unexpected len-{len(fps_m_nh)} file set for target {target}:\n{s_fps}"
+                )
 
         assert d_r is not None and fp_r is not None
 
@@ -382,8 +387,14 @@ def print_heading(s, *, ol_char="=", ul_char="-"):
 # Main function and CLI
 #
 
-def main(date_str, *, nstep=NSTEP_DEFAULT,
-    logger_info=False, logger_debug=False, stack_groups_only=False,
+
+def main(
+    date_str,
+    *,
+    nstep=NSTEP_DEFAULT,
+    logger_info=False,
+    logger_debug=False,
+    stack_groups_only=False,
     input_dir=INPUT_DIR_DEFAULT,
 ):
     # Adjust logger settings
@@ -397,14 +408,13 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
     ndays = date_final.dt.toordinal() - date_start.dt.toordinal() + 1
     pre = "pt" if not stack_groups_only else "sg"
     ofn = f"{pre}-{str(date_start).replace('-', '').replace('_', '')}.nc"
-    
+
     print_heading("Info")
     print(f"Start time: {date_start}")
     print(f"Number of hourly time steps desired: {nstep} -> {ndays} unique day(s)")
     print(f"Final time: {date_final}")
     print(f"Using {REF_YEAR} point emissions data")
     print(f"Output filename: {ofn}")
-
 
     def iter_days():
         """Yield floored Date objects and associated time slices for the daily files."""
@@ -476,7 +486,7 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
     tstep = 1  # hourly
 
     if not stack_groups_only:
-        _ = ds_out.createDimension("time", None) # unlimited for ntime
+        _ = ds_out.createDimension("time", None)  # unlimited for ntime
         time_coord = ds_out.createVariable("TIME", np.int32, ("time",))
         time_coord.units = "hours"
         time_coord.description = f"Time step (hours since {date_start})"
@@ -486,7 +496,6 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
 
     itime_start = 0
     for k in range(ndays):
-
         # Inner loop is over sectors, to fill the full point dim
         ipoint_start = 0
         for tup in data:
@@ -505,7 +514,8 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
             # Check that time in the is what we presume
             dtstr = str(ds_in.SDATE * 100 + ds_in.STIME)  # these are ds attrs
             _ = datetime.strptime(dtstr, "%Y%j%H")
-            tstep = int(ds_in.TSTEP / 10000)  # this is a ds attr; I guess units of hours * 10000 ...
+            tstep = int(ds_in.TSTEP / 10000)
+            # ^ this is a ds attr; I guess units of hours * 10000 ...
             assert tstep == 1, f"these should be hourly files but tstep={tstep}"
             assert ds_in.STIME == 0, f"files should at start at hour 0 but STIME={ds_in.stime}"
             ntime = ds_in.dimensions["tstep"].size  # but also a dimension
@@ -544,28 +554,33 @@ def main(date_str, *, nstep=NSTEP_DEFAULT,
                 if vn not in ds_out.variables:
                     v_out = ds_out.createVariable(vn, "S1", (POINT_DIM_NAME, "nchar"))
                     v_out.long_name = "Group ID"
-                    v_out.description = "Extracted from stack_groups file path, including sector, source, month"
+                    v_out.description = (
+                        "Sector time group (daily, 4-per-month, or 4-per-month + holidays) "
+                        "and reference year date"
+                    )
                     v_out[:] = ""
                 else:
                     v_out = ds_out.variables[vn]
                 x = np.full((100,), "", "S1")
-                x[:len(sg_id)] = [np.string_(c) for c in sg_id]
+                x[: len(sg_id)] = [np.string_(c) for c in sg_id]
                 v_out[point_slice, :] = x
 
             if not stack_groups_only:
                 # Add variables from inln_mole file
-                for vn in [
-                    vn
-                    for vn in list(ds_in.variables.keys())
-                    if vn not in sg_vns
-                ]:
+                for vn in ds_in.variables:
+                    if vn in sg_vns:
+                        continue
                     v_in = ds_in.variables[vn]
                     if vn not in ds_out.variables:
-                        v_out = ds_out.createVariable(vn, np.float32, ("time", POINT_DIM_NAME),
-                            zlib=True, complevel=1,
+                        v_out = ds_out.createVariable(
+                            vn,
+                            np.float32,
+                            ("time", POINT_DIM_NAME),
+                            zlib=True,
+                            complevel=1,
                         )
-                            # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
-                            # Note: complevel=4 is default, 0--9 with 9 most compression
+                        # Note: `zlib=True` is deprecated in favor of `compression='zlib'`
+                        # Note: complevel=4 is default, 0--9 with 9 most compression
                         v_out.units = v_in.units.strip()
                         v_out.description = v_in.description.strip()
                         v_out[:] = 0
@@ -612,33 +627,48 @@ def parse_args(args=None):
             "data from 16 sectors."
         )
     )
-    parser.add_argument("-s", "--start",
+    parser.add_argument(
+        "-s",
+        "--start",
+        type=str,
         help="Start date/time, in YYYYMMDD[HH] format (`-`, `_` ignored).",
-        type=str,required=True)
-    parser.add_argument("-n", "--nstep",
+        required=True,
+    )
+    parser.add_argument(
+        "-n",
+        "--nstep",
+        type=int,
         default=NSTEP_DEFAULT,
         help=(
             "Desired number of time steps for the output file (including start). "
             f"(default: {NSTEP_DEFAULT})"
         ),
-        type=int)
-    parser.add_argument("-i", "--input-dir",
+    )
+    parser.add_argument(
+        "-i",
+        "--input-dir",
         type=Path,
-        default=INPUT_DIR_DEFAULT,                
+        default=INPUT_DIR_DEFAULT,
         help=(
             "Directory where the compiled sector group files are located. "
             f"(default: {INPUT_DIR_DEFAULT.as_posix()} (GMU Hopper))"
-        )
+        ),
     )
-    parser.add_argument("--stack-groups-only",
+    parser.add_argument(
+        "--stack-groups-only",
         help="'stack_groups' data only.",
-        action="store_true")
-    parser.add_argument("--info",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--info",
         help="Print logger info messages.",
-        action="store_true")
-    parser.add_argument("--debug",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--debug",
         help="Print logger debug (and info) messages.",
-        action="store_true")
+        action="store_true",
+    )
 
     args = parser.parse_args(args)
     log.debug(f"argparse parsed args={args}")
