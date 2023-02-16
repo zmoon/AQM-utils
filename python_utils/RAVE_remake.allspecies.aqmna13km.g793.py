@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Python script to handle fire emission (RAVE) to 13-km NA domain
 
 import xarray as xr
