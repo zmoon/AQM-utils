@@ -4,53 +4,24 @@
 
 import xarray as xr
 from netCDF4 import Dataset
-import ESMF
 import os
 import sys
 import argparse
 import numpy as np
 
-def parse_args(argv):
 
-    parser = argparse.ArgumentParser(
-        description='Handle fire emission data.'
-    )
+def RAVE_remake_allspecies(date, cyc, input_fire, output_fire):
 
-    parser.add_argument('-d', '--date',
-                        help='Date for regridding.',
-                        )
-    parser.add_argument('-c', '--cycle',
-                        help='Cycle hour.',
-                        )
-    parser.add_argument('-i', '--input',
-                        help='Path to the RAVE fire data file.',
-                        )
-    parser.add_argument('-o', '--output',
-                        help='Path to the output data file.',
-                        )
-    return parser.parse_args(argv)
+    year = date[0:4]
+    mm = date[4:6]
+    dd = date[6:8]
 
-
-def RAVE_remake_allspecies(argv):
-
-    # parse args
-    cla = parse_args(argv)
-
-    DATE = cla.date
-    cyc = cla.cycle
-    in_fire = cla.input
-    out_fire = cla.output
-
-    year = DATE[0:4]
-    mm = DATE[4:6]
-    dd = DATE[6:8]
-
-    ds_togid=xr.open_dataset(in_fire)
+    ds_togid=xr.open_dataset(input_fire)
     area=ds_togid['area']
     tgt_latt = ds_togid['grid_latt']
     tgt_lont = ds_togid['grid_lont']
     
-    fout=Dataset(out_fire,'w')
+    fout=Dataset(output_fire,'w')
     fout.createDimension('Time',24)
     fout.createDimension('xFRP',800)
     fout.createDimension('yFRP',544)
@@ -74,7 +45,7 @@ def RAVE_remake_allspecies(argv):
              Store_by_Level(fout,'MeanFRP','Mean Fire Radiative Power','MW','3D','0.f','1.f')
              tgt_rate = ds_togid[svar].fillna(0)
              fout.variables['MeanFRP'][:,:,:] = tgt_rate
-         else :
+         else:
              Store_by_Level(fout,svar,svar+' Biomass Emissions','kg m-2 s-1','3D','0.f','1.f')
              tgt_rate = ds_togid[svar].fillna(0)/area/3600
              fout.variables[svar][:,:,:] = tgt_rate
@@ -117,7 +88,42 @@ def Store_by_Level(fout,varname,long_name,units,dim,fval,sfactor):
         var_out.coordinates='Time Latitude Longitude'
 
 
-# Main call ===================================================== CHJ =====
-if __name__ == '__main__':
-    RAVE_remake_allspecies(sys.argv[1:])
+def parse_args(argv):
+
+    parser = argparse.ArgumentParser(
+        description='Handle fire emission data.'
+    )
+
+    parser.add_argument('-d', '--date',
+                        dest="date",
+                        required=True,
+                        help='Date for regridding.',
+                        )
+    parser.add_argument('-c', '--cyc',
+                        dest="cyc",
+                        required=True,
+                        help='Cycle hour.',
+                        )
+    parser.add_argument('-i', '--input_fire',
+                        dest="input_fire",
+                        required=True,
+                        help='Path to the RAVE fire data file.',
+                        )
+    parser.add_argument('-o', '--output_fire',
+                        dest="output_fire",
+                        required=True,
+                        help='Path to the output data file.',
+                        )
+    return parser.parse_args(argv)
+
+
+# Main call =====================================================
+if __name__ == "__main__":
+    args = parse_args(sys.argv[1:])
+    RAVE_remake_allspecies(
+        date=args.date,
+        cyc=args.cyc,
+        input_fire=args.input_fire,
+        output_fire=args.output_fire
+    )
 
