@@ -150,7 +150,7 @@ set(exe_src aqm_bias_correct.f90)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS
-      "-g -traceback -fp-model source -free -convert big_endian")
+      "-g -traceback -fp-model source -free -convert big_endian -qopenmp")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
   set(CMAKE_Fortran_FLAGS_DEBUG "-O0")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
@@ -166,6 +166,10 @@ endif()
 add_library(${lib_name} STATIC ${lib_src})
 add_executable(${exe_name} ${exe_src})
 
+set(mod_dir "${CMAKE_CURRENT_BINARY_DIR}/mod")
+set_target_properties(${lib_name} PROPERTIES Fortran_MODULE_DIRECTORY ${mod_dir})
+target_include_directories(${lib_name} INTERFACE ${mod_dir})
+
 target_link_libraries(
   ${lib_name}
   NetCDF::NetCDF_Fortran
@@ -173,7 +177,7 @@ target_link_libraries(
 )
 
 if(OpenMP_Fortran_FOUND)
-  target_link_libraries(${exe_name} PUBLIC OpenMP::OpenMP_Fortran)
+  target_link_libraries(${exe_name} PRIVATE OpenMP::OpenMP_Fortran)
 endif()
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})
