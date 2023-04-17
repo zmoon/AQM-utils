@@ -215,10 +215,13 @@
 !-- set file unit
       ifilw=52
       if (nt .le. 9 ) then
+       write(chtmp(1:2),'(a2)')"00"
+       write(chtmp(3:3),'(i1)')nt
+      else if ( (nt .ge. 10) .and. (nt .le. 99) ) then
        write(chtmp(1:1),'(a1)')"0"
-       write(chtmp(2:2),'(i1)')nt
+       write(chtmp(2:3),'(i2)')nt
       else
-       write(chtmp(1:2),'(i2)')nt
+       write(chtmp(1:3),'(i3)')nt
       endif
    
       write(grib_id,'(i3.3)')id_gribdomain
