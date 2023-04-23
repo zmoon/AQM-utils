@@ -26,6 +26,7 @@ list(APPEND SRC_FLIB2
     ${FLIB}/multisets.f90
     ${FLIB}/netcdf_sup.f90
     ${FLIB}/netwrite3.no-udunits.f90 
+    ${FLIB}/print_omp_info.f90
     ${FLIB}/read_line.f90
     ${FLIB}/read_netcdf_var.f90
     ${FLIB}/shell-sort.f90
@@ -99,6 +100,7 @@ list(APPEND SRC_LOCAL1
     align_obs_to_forecasts.f90
     blackout_obs_data.f90
     compute_wind.f90
+    convert_obs_units.f90
     get_command_args.main.f90
     get_window_offsets.f90
     grid_distances.f90
@@ -112,8 +114,11 @@ list(APPEND SRC_LOCAL2
     read_var_table.f90
     read_config_file_main.f90
     read_interp_forecasts.f90
-    read_obs_series.f90
+    read_obs_file_netcdf.f90
     read_obs_qc.f90
+    read_obs_series.f90
+    read_obs_series_bufr.f90
+    read_obs_series_netcdf.f90
     read_predictor_weights.f90
     read_exception_list.f90
     spread_bias.f90

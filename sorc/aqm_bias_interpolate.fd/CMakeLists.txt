@@ -41,7 +41,7 @@ list(APPEND SRC_LOCAL
     get_command_args.interp.f90
     interpolate.f90
     read_config_file_interp.f90
-    read_station_file.f90
+    read_site_list.f90
     write_interp_netcdf.f90
     )
 

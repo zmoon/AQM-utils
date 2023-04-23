@@ -19,16 +19,13 @@ list(APPEND SRC_FLIB2
     ${FLIB}/get_free_unit.f90
     ${FLIB}/get_param_module.f90     
     ${FLIB}/message_nolog.f90
-    ${FLIB}/netwrite3.no-udunits.f90 
+    ${FLIB}/netwrite3.no-udunits.f90
+    ${FLIB}/next_time.f90
     ${FLIB}/read_line.f90)
-
-list(APPEND SRC_FLIB3
-    ${FLIB}/next_time.f90)
 
 list(APPEND lib_src
     ${SRC_FLIB1}
     ${SRC_FLIB2}
-    ${SRC_FLIB3}
     )
 
 set(exe_name aqm_post_maxi_bias_cor_grib2)
