@@ -1,6 +1,6 @@
 set(IOAPI_OFFSET_64 YES)
 
-set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib")
+set(LIB_DIR "${CMAKE_SOURCE_DIR}/lib")
 set(ALIB "${LIB_DIR}/lib.analog")
 set(BLIB "${LIB_DIR}/lib.bias")
 set(FLIB "${LIB_DIR}/lib.f90")
@@ -177,12 +177,13 @@ target_include_directories(${lib_name} INTERFACE ${mod_dir})
 
 target_link_libraries(
   ${lib_name}
+  PUBLIC
   NetCDF::NetCDF_Fortran
   bufr::bufr_4
 )
 
 if(OpenMP_Fortran_FOUND)
-  target_link_libraries(${exe_name} PRIVATE OpenMP::OpenMP_Fortran)
+  target_link_libraries(${exe_name} PUBLIC OpenMP::OpenMP_Fortran)
 endif()
 
 target_link_libraries(${exe_name} PRIVATE ${lib_name})

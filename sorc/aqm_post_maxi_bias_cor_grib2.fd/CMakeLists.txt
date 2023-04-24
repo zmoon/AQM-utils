@@ -1,6 +1,6 @@
 set(IOAPI_OFFSET_64 YES)
 
-set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib")
+set(LIB_DIR "${CMAKE_SOURCE_DIR}/lib")
 set(BLIB "${LIB_DIR}/lib.bias")
 set(FLIB "${LIB_DIR}/lib.f90")
 
@@ -52,6 +52,7 @@ add_executable(${exe_name} ${exe_src})
 
 target_link_libraries(
   ${lib_name}
+  PUBLIC
   NetCDF::NetCDF_Fortran
   g2::g2_4
   w3emc::w3emc_4

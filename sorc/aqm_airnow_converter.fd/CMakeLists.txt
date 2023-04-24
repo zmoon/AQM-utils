@@ -1,6 +1,6 @@
 set(IOAPI_OFFSET_64 YES)
 
-set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib")
+set(LIB_DIR "${CMAKE_SOURCE_DIR}/lib")
 set(CLIB "${LIB_DIR}/lib.converter")
 
 message("=== AQM library directory: ${LIB_DIR}")
@@ -56,6 +56,7 @@ target_include_directories(${lib_name} INTERFACE ${mod_dir})
 
 target_link_libraries(
   ${lib_name}
+  PUBLIC
   NetCDF::NetCDF_Fortran
 )
 
