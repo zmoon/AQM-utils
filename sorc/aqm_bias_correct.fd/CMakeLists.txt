@@ -160,7 +160,7 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS_DEBUG "-O0")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
   set(CMAKE_Fortran_FLAGS
-      "-g -fbacktrace -ffree-form -ffree-line-length-none -fconvert=big-endian")
+      "-g -fbacktrace -ffree-form -ffree-line-length-none -fconvert=big-endian -fopenmp")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
   set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -ggdb -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans -ffpe-trap=invalid,zero,overflow -fbounds-check")
   if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
