@@ -656,6 +656,13 @@ def parse_args(args=None):
         ),
     )
     parser.add_argument(
+        "-r",
+        "--reference-year",
+        type=int,
+        default=REF_YEAR,
+        help=f"Emissions data year, e.g. 2016 or 2019. (default: {REF_YEAR})",
+    )
+    parser.add_argument(
         "--stack-groups-only",
         help="'stack_groups' data only.",
         action="store_true",
